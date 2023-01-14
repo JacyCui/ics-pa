@@ -15,14 +15,13 @@
 
 #include <isa.h>
 #include <cpu/cpu.h>
+#include <memory/vaddr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
 
-static int is_batch_mode = false;
 
-void init_regex();
-void init_wp_pool();
+static int is_batch_mode = false;
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -125,9 +124,9 @@ void init_sdb() {
   init_wp_pool();
 }
 
+
 // ---------------------------
 // Implementation of all monitor commands
-
 
 static int cmd_help(char *args) {
   /* extract the first argument */
@@ -163,36 +162,113 @@ static int cmd_q(char *args) {
 }
 
 static int cmd_si(char *args) {
-
+  char *arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    cpu_exec(1);
+    return 0;
+  }
+  int64_t n = strtoll(arg, NULL, 0);
+  if (n > 0) {
+    cpu_exec(n);
+  } else {
+    printf("%s%s%s\n", ANSI_FG_RED, "Usage: si [N (N > 0)]", ANSI_NONE);
+  }
   return 0;
 }
 
 static int cmd_info(char *args) {
-
+  char *arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    printf("%s%s%s\n", ANSI_FG_RED, "Usage: info r -> register\n       info w -> watch points\n       info s -> symbol table\n", ANSI_NONE);
+    return 0;
+  }
+  switch (arg[0]) {
+    case 'r': isa_reg_display(); break;
+    case 'w': display_wp(); break;
+    case 's': isa_display_symtab(); break;
+    default: printf("%s%s%s\n", ANSI_FG_RED, "Usage: info r -> register\n       info w -> watch points\n       info s -> symbol table\n", ANSI_NONE);
+  }
   return 0;
 }
 
 static int cmd_x(char *args) {
-
+  char *arg1 = strtok(NULL, " ");
+  if (arg1 == NULL) {
+    printf("%s%s%s\n", ANSI_FG_RED, "Usage: x N Expr (eg. x 10 $sp, N > 0)", ANSI_NONE);
+    return 0;
+  }
+  char *arg2 = strtok(NULL, " ");
+  if (arg2 == NULL) {
+    printf("%s%s%s\n", ANSI_FG_RED, "Usage: x N Expr (eg. x 10 $sp, N > 0)", ANSI_NONE);
+    return 0;
+  }
+  int n = strtol(arg1, NULL, 0);
+  int i;
+  vaddr_t vaddr;
+  char *e;
+  bool success = true;
+  if (n > 0) {
+    e = args + strlen(arg1) + 1;
+    vaddr = expr(e, &success);
+    if (!success) {
+      printf("%sInvalid Expression %s!%s\n", ANSI_FG_RED, e, ANSI_NONE);
+      return 0;
+    }
+    for (i = 0; i < n; i++) {
+      printf("%#010x: %#010x\n", vaddr + (i << 2), vaddr_read(vaddr + (i << 2), 4));
+    }
+  } else {
+    printf("%s%s%s\n", ANSI_FG_RED, "Usage: x N Expr (eg. x 10 $sp, N > 0)", ANSI_NONE);
+  }
   return 0;
 }
 
 static int cmd_p(char *args) {
-  
+  if (args == NULL) {
+    printf("%s%s%s\n", ANSI_FG_RED, "Usage: p Expr", ANSI_NONE);
+    return 0;
+  }
+  bool success = true;
+  word_t res = expr(args, &success);
+  if (!success) {
+    printf("%sInvalid Expression %s!%s\n", ANSI_FG_RED, args, ANSI_NONE);
+    return 0;
+  }
+  printf("%sValid Expr: %s%s\n", ANSI_FG_GREEN, args, ANSI_NONE);
+  printf("Value:  %-20s%-20s%-20s\n", "hexdecimal", "unsigned decimal", "signed decimal");
+  printf("        %#-20x%-20u%-20d\n", res, res, res);
   return 0;
 }
 
 static int cmd_w(char *args) {
-
+  if (args == NULL) {
+    printf("%s%s%s\n", ANSI_FG_RED, "Usage: w Expr", ANSI_NONE);
+    return 0;
+  }
+  bool success = true;
+  add_wp(args, &success);
+  if (!success) {
+    printf("%sFail to set watch point for %s!%s\n", ANSI_FG_RED, args, ANSI_NONE);
+  }
   return 0;
 }
 
 static int cmd_d(char *args) {
-  
+  char *arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    printf("%s%s%s\n", ANSI_FG_RED, "Usage: d N", ANSI_NONE);
+    return 0;
+  }
+  int n = strtol(arg, NULL, 0);
+  bool success = true;
+  delete_wp(n, &success);
+  if (!success) {
+    printf("%sFail to delete watch point numbered %d!%s\n", ANSI_FG_RED, n, ANSI_NONE);
+  }
   return 0;
 }
 
 static int cmd_bt(char *args) {
-
+  IFDEF(CONFIG_FTRACE, display_backtrace());
   return 0;
 }

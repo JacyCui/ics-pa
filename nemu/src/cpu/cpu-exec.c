@@ -32,6 +32,11 @@ static bool g_print_step = false;
 
 void device_update();
 
+
+#ifdef CONFIG_FTRACE
+static void ftrace(Decode *d);
+#endif
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
@@ -122,3 +127,19 @@ void cpu_exec(uint64_t n) {
     case NEMU_QUIT: statistic();
   }
 }
+
+
+
+/* TODO: function trace */
+
+#ifdef CONFIG_FTRACE
+
+static void ftrace(Decode *d) {
+
+}
+
+static void display_backtrace() {
+  
+}
+
+#endif

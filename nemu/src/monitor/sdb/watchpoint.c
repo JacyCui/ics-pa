@@ -41,3 +41,20 @@ void init_wp_pool() {
 
 /* TODO: Implement the functionality of watchpoint */
 
+
+void add_wp(char *e, bool *success) {
+
+}
+
+void update_wp() {
+
+}
+
+void delete_wp(int no, bool *success) {
+
+}
+
+void display_wp() {
+  
+}
+

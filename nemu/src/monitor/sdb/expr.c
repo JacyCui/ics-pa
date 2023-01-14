@@ -19,6 +19,8 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include "sdb.h"
+
 
 enum {
   TK_NOTYPE = 256, TK_EQ,
@@ -62,12 +64,15 @@ void init_regex() {
   }
 }
 
+#define MAX_TOKEN_LEN 32
+#define MAX_TOKEN_NUM 128
+
 typedef struct token {
   int type;
-  char str[32];
+  char str[MAX_TOKEN_LEN];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+static Token tokens[MAX_TOKEN_NUM] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
 static bool make_token(char *e) {

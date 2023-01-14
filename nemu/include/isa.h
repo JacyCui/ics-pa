@@ -55,4 +55,11 @@ word_t isa_query_intr();
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc);
 void isa_difftest_attach();
 
+// elf
+void isa_load_symtab(const char *elf_file);
+word_t isa_lookup_symtab_by_name(const char *symbol, bool *success);
+const char *isa_lookup_symtab_by_address(vaddr_t vaddr, bool *success);
+void isa_display_symtab();
+void isa_free_symtab();
+
 #endif

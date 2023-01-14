@@ -18,6 +18,20 @@
 
 #include <common.h>
 
+void init_regex();
+
 word_t expr(char *e, bool *success);
+
+
+void init_wp_pool();
+
+void add_wp(char *e, bool *success);
+
+void update_wp();
+
+void delete_wp(int no, bool *success);
+
+void display_wp();
+
 
 #endif

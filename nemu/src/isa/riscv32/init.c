@@ -40,3 +40,27 @@ void init_isa() {
   /* Initialize this virtual computer system. */
   restart();
 }
+
+/* TODO: resolve elf file */
+
+void isa_load_symtab(const char *elf_file) {
+
+}
+
+word_t isa_lookup_symtab_by_name(const char *symbol, bool *success) {
+
+  return 0;
+}
+
+const char *isa_lookup_symtab_by_address(vaddr_t vaddr, bool *success) {
+
+  return NULL;
+}
+
+void isa_display_symtab() {
+
+}
+
+void isa_free_symtab() {
+  
+}
