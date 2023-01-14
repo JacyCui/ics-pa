@@ -179,7 +179,7 @@ static int cmd_si(char *args) {
 static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
   if (arg == NULL) {
-    printf("%s%s%s\n", ANSI_FG_RED, "Usage: info r -> register\n       info w -> watch points\n       info s -> symbol table\n", ANSI_NONE);
+    printf("%s%s%s", ANSI_FG_RED, "Usage: info r -> register\n       info w -> watch points\n       info s -> symbol table\n", ANSI_NONE);
     return 0;
   }
   switch (arg[0]) {

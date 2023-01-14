@@ -136,7 +136,7 @@ static bool make_token(char *e) {
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i ++) {
 
-      if (nr_token >= ADDRLEN(MAX_TOKEN_NUM)) {
+      if (nr_token >= MAX_TOKEN_NUM) {
         printf("Subexpression ...%s causes a buffer overflow!", e + position);
         return false;
       }
@@ -153,18 +153,18 @@ static bool make_token(char *e) {
         switch (rules[i].token_type) {
           case TK_NOTYPE: break;
           case '-':
-            if (nr_token != 0 && (tokens[nr_token - 1].type == TK_DEC_NUM) ||
+            if (nr_token != 0 && (tokens[nr_token - 1].type == TK_DEC_NUM ||
             tokens[nr_token - 1].type == TK_HEX_NUM || tokens[nr_token - 1].type == TK_REG ||
-            tokens[nr_token - 1].type == ')') {
+            tokens[nr_token - 1].type == ')')) {
               tokens[nr_token++].type = '-';
             } else {
               tokens[nr_token++].type = TK_NEG;
             }
             break;
           case '*':
-            if (nr_token != 0 && (tokens[nr_token - 1].type == TK_DEC_NUM) ||
+            if (nr_token != 0 && (tokens[nr_token - 1].type == TK_DEC_NUM ||
             tokens[nr_token - 1].type == TK_HEX_NUM || tokens[nr_token - 1].type == TK_REG ||
-            tokens[nr_token - 1].type == ')') {
+            tokens[nr_token - 1].type == ')')) {
               tokens[nr_token++].type = '*';
             } else {
               tokens[nr_token++].type = TK_NEG;

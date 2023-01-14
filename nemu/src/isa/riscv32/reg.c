@@ -24,8 +24,28 @@ const char *regs[] = {
 };
 
 void isa_reg_display() {
+  int i;
+  printf("RISC-V 32 Regfile\n----------------------------------------------------------------\n");
+  printf("%-10s%-20s%-20s%-20s\n", "name", "hexdecimal", "unsigned decimal", "signed decimal");
+  printf("----------------------------------------------------------------\n");
+  printf("%-10s%#-20x%-20u%-20d\n", "pc", cpu.pc, cpu.pc, cpu.pc);
+  for (i = 0; i < 32; i++) {
+    printf("%-10s%#-20x%-20u%-20d\n", regs[i], cpu.gpr[i], cpu.gpr[i], cpu.gpr[i]);
+  }
+  printf("----------------------------------------------------------------\n");
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
+  if (strcmp(s, "pc") == 0) {
+    return cpu.pc;
+  }
+  int i;
+  for (i = 0; i < 32; i++) {
+    if (strcmp(s, regs[i]) == 0) {
+      return cpu.gpr[i];
+    }
+  }
+  *success = false;
+  printf("No register named %s\n", s);
   return 0;
 }
