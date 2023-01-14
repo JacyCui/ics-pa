@@ -42,17 +42,17 @@ static char* rl_gets() {
   return line_read;
 }
 
-static int cmd_c(char *args) {
-  cpu_exec(-1);
-  return 0;
-}
-
-
-static int cmd_q(char *args) {
-  return -1;
-}
 
 static int cmd_help(char *args);
+static int cmd_c(char *args);
+static int cmd_q(char *args);
+static int cmd_si(char *args);
+static int cmd_info(char *args);
+static int cmd_x(char *args);
+static int cmd_p(char *args);
+static int cmd_w(char *args);
+static int cmd_d(char *args);
+static int cmd_bt(char *args);
 
 static struct {
   const char *name;
@@ -62,35 +62,18 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
   /* TODO: Add more commands */
-
+  { "si", "Single step forward for N(1 by default) instruction", cmd_si },
+  { "info", "Display information of registers(r) or watch points(w) or symbol tables(s)", cmd_info },
+  { "x", "Print N words of memory started from Expr", cmd_x },
+  { "p", "Evaluate the given expression Expr", cmd_p },
+  { "w", "Set a watch point for Expr", cmd_w },
+  { "d", "Delete the watch point numbered by N", cmd_d },
+  { "bt", "Display function call stack", cmd_bt }
 };
 
 #define NR_CMD ARRLEN(cmd_table)
 
-static int cmd_help(char *args) {
-  /* extract the first argument */
-  char *arg = strtok(NULL, " ");
-  int i;
-
-  if (arg == NULL) {
-    /* no argument given */
-    for (i = 0; i < NR_CMD; i ++) {
-      printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
-    }
-  }
-  else {
-    for (i = 0; i < NR_CMD; i ++) {
-      if (strcmp(arg, cmd_table[i].name) == 0) {
-        printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
-        return 0;
-      }
-    }
-    printf("Unknown command '%s'\n", arg);
-  }
-  return 0;
-}
 
 void sdb_set_batch_mode() {
   is_batch_mode = true;
@@ -130,7 +113,7 @@ void sdb_mainloop() {
       }
     }
 
-    if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
+    if (i == NR_CMD) { printf("%sUnknown command '%s'%s\n", ANSI_FG_RED, cmd, ANSI_NONE); }
   }
 }
 
@@ -140,4 +123,76 @@ void init_sdb() {
 
   /* Initialize the watchpoint pool. */
   init_wp_pool();
+}
+
+// ---------------------------
+// Implementation of all monitor commands
+
+
+static int cmd_help(char *args) {
+  /* extract the first argument */
+  char *arg = strtok(NULL, " ");
+  int i;
+
+  if (arg == NULL) {
+    /* no argument given */
+    for (i = 0; i < NR_CMD; i ++) {
+      printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
+    }
+  }
+  else {
+    for (i = 0; i < NR_CMD; i ++) {
+      if (strcmp(arg, cmd_table[i].name) == 0) {
+        printf("%s%s - %s%s\n", ANSI_FG_GREEN, cmd_table[i].name, cmd_table[i].description, ANSI_NONE);
+        return 0;
+      }
+    }
+    printf("%sUnknown command '%s'%s\n", ANSI_FG_RED, arg, ANSI_NONE);
+  }
+  return 0;
+}
+
+static int cmd_c(char *args) {
+  cpu_exec(-1);
+  return 0;
+}
+
+static int cmd_q(char *args) {
+  nemu_state.state = NEMU_QUIT;
+  return -1;
+}
+
+static int cmd_si(char *args) {
+
+  return 0;
+}
+
+static int cmd_info(char *args) {
+
+  return 0;
+}
+
+static int cmd_x(char *args) {
+
+  return 0;
+}
+
+static int cmd_p(char *args) {
+  
+  return 0;
+}
+
+static int cmd_w(char *args) {
+
+  return 0;
+}
+
+static int cmd_d(char *args) {
+  
+  return 0;
+}
+
+static int cmd_bt(char *args) {
+
+  return 0;
 }
