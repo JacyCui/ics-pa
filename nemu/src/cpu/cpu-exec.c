@@ -32,6 +32,11 @@ static bool g_print_step = false;
 
 void device_update();
 
+#ifdef CONFIG_WATCHPOINT
+void update_wp();
+void clear_wp_pool();
+#endif
+
 
 #ifdef CONFIG_FTRACE
 static void ftrace(Decode *d);
@@ -43,6 +48,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
+  IFDEF(CONFIG_WATCHPOINT, update_wp());
 }
 
 static void exec_once(Decode *s, vaddr_t pc) {
@@ -123,8 +129,9 @@ void cpu_exec(uint64_t n) {
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
           nemu_state.halt_pc);
-      // fall through
-    case NEMU_QUIT: statistic();
+    case NEMU_QUIT:
+      statistic();
+      IFDEF(CONFIG_WATCHPOINT, clear_wp_pool());
   }
 }
 

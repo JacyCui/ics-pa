@@ -49,9 +49,13 @@ static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
 static int cmd_p(char *args);
+#ifdef CONFIG_WATCHPOINT
 static int cmd_w(char *args);
 static int cmd_d(char *args);
+#endif
+#ifdef CONFIG_FTRACE
 static int cmd_bt(char *args);
+#endif
 
 static struct {
   const char *name;
@@ -66,9 +70,13 @@ static struct {
   { "info", "Display information of registers(r) or watch points(w) or symbol tables(s)", cmd_info },
   { "x", "Print N words of memory started from Expr", cmd_x },
   { "p", "Evaluate the given expression Expr", cmd_p },
+#ifdef CONFIG_WATCHPOINT
   { "w", "Set a watch point for Expr", cmd_w },
   { "d", "Delete the watch point numbered by N", cmd_d },
-  { "bt", "Display function call stack", cmd_bt }
+#endif
+#ifdef CONFIG_FTRACE
+  { "bt", "Display function call stack", cmd_bt },
+#endif
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -121,7 +129,7 @@ void init_sdb() {
   init_regex();
 
   /* Initialize the watchpoint pool. */
-  init_wp_pool();
+  IFDEF(CONFIG_WATCHPOINT, init_wp_pool());
 }
 
 
@@ -240,6 +248,7 @@ static int cmd_p(char *args) {
   return 0;
 }
 
+#ifdef CONFIG_WATCHPOINT
 static int cmd_w(char *args) {
   if (args == NULL) {
     printf("%s%s%s\n", ANSI_FG_RED, "Usage: w Expr", ANSI_NONE);
@@ -267,8 +276,11 @@ static int cmd_d(char *args) {
   }
   return 0;
 }
+#endif
 
+#ifdef CONFIG_FTRACE
 static int cmd_bt(char *args) {
   IFDEF(CONFIG_FTRACE, display_backtrace());
   return 0;
 }
+#endif

@@ -186,6 +186,27 @@ config DIFFTEST_REF_NAME
   default "kvm" if DIFFTEST_REF_KVM
   default "spike" if DIFFTEST_REF_SPIKE
   default "none"
+
+config WATCHPOINT
+  bool "Enable watchpoint"
+  default n
+
+config IRINGBUF
+  bool "Enable instruction ring buffer"
+  default n
+
+config MTRACE
+  bool "Enable memory trace"
+  default n
+
+config FTRACE
+  bool "Enable function trace"
+  default n
+
+config DTRACE
+  bool "Enable device trace"
+  default n
+
 endmenu
 
 if MODE_SYSTEM
