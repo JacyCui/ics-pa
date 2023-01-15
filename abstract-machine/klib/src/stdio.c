@@ -6,16 +6,35 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
+#define BUFFER_LEN 128
+
+static char buffer[BUFFER_LEN];
+
 int printf(const char *fmt, ...) {
-  panic("Not implemented");
+  va_list args;
+  va_start(args, fmt);
+  int ret = vsprintf(buffer, fmt, args);
+  va_end(args);
+  putstr(buffer);
+  return ret;
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
-  panic("Not implemented");
+  va_list args;
+  va_start(args, fmt);
+  int ret = vsnprintf(out, n, fmt, args);
+  va_end(args);
+  return ret;
 }
 
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
-  panic("Not implemented");
+  int len = vsprintf(buffer, fmt, ap);
+  if (len < n) {
+    strcpy(out, buffer);
+    return len;
+  }
+  strncpy(out, buffer, n);
+  return n;
 }
 
 #define ZEROPAD 1               // Pad with zero
