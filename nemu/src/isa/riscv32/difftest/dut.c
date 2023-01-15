@@ -18,7 +18,7 @@
 #include "../local-include/reg.h"
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
-  return false;
+  return memcmp(&cpu, ref_r, sizeof(CPU_state)) == 0;
 }
 
 void isa_difftest_attach() {
