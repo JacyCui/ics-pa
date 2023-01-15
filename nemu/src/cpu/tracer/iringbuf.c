@@ -28,7 +28,7 @@ void iringbuf_display() {
 }
 
 void iringbuf_clear() {
-    Log("Clearing instruction ring buffer ...\n");
+    Log("Clearing instruction ring buffer ...");
     int i = p;
     do {
         if (iringbuf[i] != NULL) {

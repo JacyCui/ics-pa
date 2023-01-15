@@ -167,7 +167,7 @@ static bool make_token(char *e) {
             tokens[nr_token - 1].type == ')')) {
               tokens[nr_token++].type = '*';
             } else {
-              tokens[nr_token++].type = TK_NEG;
+              tokens[nr_token++].type = TK_DE_REF;
             }
             break;
           case TK_DEC_NUM: case TK_HEX_NUM: case TK_REG: case TK_SYMBOL:

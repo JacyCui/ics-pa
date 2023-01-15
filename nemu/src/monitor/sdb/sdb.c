@@ -53,12 +53,9 @@ static int cmd_p(char *args);
 static int cmd_w(char *args);
 static int cmd_d(char *args);
 #endif
-#ifdef CONFIG_FTRACE
-static int cmd_bt(char *args);
-#endif
-#ifdef CONFIG_IRINGBUF
-static int cmd_ir(char *args);
-#endif
+IFDEF(CONFIG_FTRACE, static int cmd_bt(char *args);)
+IFDEF(CONFIG_IRINGBUF, static int cmd_ir(char *args);)
+IFDEF(CONFIG_MTRACE, static int cmd_mt(char *args);)
 
 static struct {
   const char *name;
@@ -77,12 +74,9 @@ static struct {
   { "w", "Set a watch point for Expr", cmd_w },
   { "d", "Delete the watch point numbered by N", cmd_d },
 #endif
-#ifdef CONFIG_FTRACE
-  { "bt", "Display function call stack", cmd_bt },
-#endif
-#ifdef CONFIG_IRINGBUF
-  { "ir", "Display instruction ring buffer", cmd_ir},
-#endif
+  IFDEF(CONFIG_FTRACE, { "bt", "Display function call stack", cmd_bt },)
+  IFDEF(CONFIG_IRINGBUF, { "ir", "Display instruction ring buffer", cmd_ir},)
+  IFDEF(CONFIG_MTRACE, { "mt", "Display memory trace", cmd_mt},)
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -298,6 +292,15 @@ void iringbuf_display();
 
 static int cmd_ir(char *args) {
   iringbuf_display();
+  return 0;
+}
+#endif
+
+#ifdef CONFIG_MTRACE
+void mtrace_display();
+
+static int cmd_mt(char *args) {
+  mtrace_display();
   return 0;
 }
 #endif

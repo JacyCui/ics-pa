@@ -96,6 +96,7 @@ void delete_wp(int NO, bool *success) {
 }
 
 void clear_wp_pool() {
+  Log("Clearing watch point pool ...");
   WP *p = head;
   WP *temp;
   while (p != NULL) {

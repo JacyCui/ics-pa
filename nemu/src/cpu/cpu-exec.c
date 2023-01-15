@@ -43,9 +43,8 @@ void iringbuf_display();
 void iringbuf_clear();
 #endif
 
-#ifdef CONFIG_FTRACE
-void ftrace(Decode *d);
-#endif
+IFDEF(CONFIG_FTRACE, void ftrace(Decode *d);)
+IFDEF(CONFIG_MTRACE, void mtrace_clear();)
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
@@ -143,6 +142,7 @@ void cpu_exec(uint64_t n) {
       statistic();
       IFDEF(CONFIG_WATCHPOINT, clear_wp_pool());
       IFDEF(CONFIG_IRINGBUF, iringbuf_clear());
+      IFDEF(CONFIG_MTRACE, mtrace_clear());
   }
 }
 
