@@ -33,9 +33,9 @@ int    atoi      (const char *nptr);
 
 // stdio.h
 int    printf    (const char *format, ...);
-int    sprintf   (char *str, const char *format, ...);
+int    sprintf   (char *buf, const char *fmt, ...);
 int    snprintf  (char *str, size_t size, const char *format, ...);
-int    vsprintf  (char *str, const char *format, va_list ap);
+int    vsprintf  (char *buf, const char *fmt, va_list args);
 int    vsnprintf (char *str, size_t size, const char *format, va_list ap);
 
 // assert.h
