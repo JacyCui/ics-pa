@@ -32,8 +32,13 @@ uint8_t* new_space(int size) {
   return p;
 }
 
+IFDEF(CONFIG_MTRACE, void mtrace_display();)
+IFDEF(CONFIG_DTRACE, void dtrace_display();)
+
 static void check_bound(IOMap *map, paddr_t addr) {
   if (map == NULL) {
+    IFDEF(CONFIG_MTRACE, mtrace_display());
+    IFDEF(CONFIG_DTRACE, dtrace_display());
     Assert(map != NULL, "address (" FMT_PADDR ") is out of bound at pc = " FMT_WORD, addr, cpu.pc);
   } else {
     Assert(addr <= map->high && addr >= map->low,

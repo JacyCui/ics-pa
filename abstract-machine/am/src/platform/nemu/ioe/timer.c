@@ -5,7 +5,10 @@ void __am_timer_init() {
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
-  uptime->us = 0;
+  uptime->us = ((uint64_t)inl(RTC_ADDR + 4) << 32) + (uint64_t)inl(RTC_ADDR);
+  
+  // This is wrong due to the nemu timer implementation !
+  // uptime->us = (uint64_t)inl(RTC_ADDR) + ((uint64_t)inl(RTC_ADDR + 4) << 32);
 }
 
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {

@@ -6,7 +6,7 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-#define BUFFER_LEN 128
+#define BUFFER_LEN 1024
 
 static char buffer[BUFFER_LEN];
 
