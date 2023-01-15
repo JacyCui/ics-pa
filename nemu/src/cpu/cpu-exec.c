@@ -37,9 +37,14 @@ void update_wp();
 void clear_wp_pool();
 #endif
 
+#ifdef CONFIG_IRINGBUF
+void iringbuf_add(const char *logbuf);
+void iringbuf_display();
+void iringbuf_clear();
+#endif
 
 #ifdef CONFIG_FTRACE
-static void ftrace(Decode *d);
+void ftrace(Decode *d);
 #endif
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
@@ -49,6 +54,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
   IFDEF(CONFIG_WATCHPOINT, update_wp());
+  IFDEF(CONFIG_IRINGBUF, iringbuf_add(_this->logbuf));
 }
 
 static void exec_once(Decode *s, vaddr_t pc) {
@@ -122,31 +128,22 @@ void cpu_exec(uint64_t n) {
 
   switch (nemu_state.state) {
     case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
-
-    case NEMU_END: case NEMU_ABORT:
+    case NEMU_ABORT:
+      IFDEF(CONFIG_IRINGBUF, iringbuf_display());
+    case NEMU_END:
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
           nemu_state.halt_pc);
+      if (nemu_state.halt_ret != 0) {
+        IFDEF(CONFIG_IRINGBUF, iringbuf_display());
+      }
     case NEMU_QUIT:
       statistic();
       IFDEF(CONFIG_WATCHPOINT, clear_wp_pool());
+      IFDEF(CONFIG_IRINGBUF, iringbuf_clear());
   }
 }
 
 
-
-/* TODO: function trace */
-
-#ifdef CONFIG_FTRACE
-
-static void ftrace(Decode *d) {
-
-}
-
-static void display_backtrace() {
-  
-}
-
-#endif

@@ -56,6 +56,9 @@ static int cmd_d(char *args);
 #ifdef CONFIG_FTRACE
 static int cmd_bt(char *args);
 #endif
+#ifdef CONFIG_IRINGBUF
+static int cmd_ir(char *args);
+#endif
 
 static struct {
   const char *name;
@@ -76,6 +79,9 @@ static struct {
 #endif
 #ifdef CONFIG_FTRACE
   { "bt", "Display function call stack", cmd_bt },
+#endif
+#ifdef CONFIG_IRINGBUF
+  { "ir", "Display instruction ring buffer", cmd_ir},
 #endif
 };
 
@@ -279,8 +285,19 @@ static int cmd_d(char *args) {
 #endif
 
 #ifdef CONFIG_FTRACE
+void ftrace_display();
+
 static int cmd_bt(char *args) {
-  IFDEF(CONFIG_FTRACE, display_backtrace());
+  ftrace_display();
+  return 0;
+}
+#endif
+
+#ifdef CONFIG_IRINGBUF
+void iringbuf_display();
+
+static int cmd_ir(char *args) {
+  iringbuf_display();
   return 0;
 }
 #endif

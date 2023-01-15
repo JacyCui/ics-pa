@@ -146,6 +146,26 @@ config ITRACE_COND
   string "Only trace instructions when the condition is true"
   default "true"
 
+config IRINGBUF
+  depends on ITRACE
+  bool "Enable instruction ring buffer"
+  default n
+
+config MTRACE
+  depends on TRACE
+  bool "Enable memory tracer"
+  default n
+
+config FTRACE
+  depends on TRACE
+  bool "Enable function tracer"
+  default n
+
+config DTRACE
+  depends on TRACE
+  bool "Enable device tracer"
+  default n
+
 
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
@@ -189,22 +209,6 @@ config DIFFTEST_REF_NAME
 
 config WATCHPOINT
   bool "Enable watchpoint"
-  default n
-
-config IRINGBUF
-  bool "Enable instruction ring buffer"
-  default n
-
-config MTRACE
-  bool "Enable memory trace"
-  default n
-
-config FTRACE
-  bool "Enable function trace"
-  default n
-
-config DTRACE
-  bool "Enable device trace"
   default n
 
 endmenu
