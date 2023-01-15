@@ -43,7 +43,13 @@ void iringbuf_display();
 void iringbuf_clear();
 #endif
 
-IFDEF(CONFIG_FTRACE, void ftrace(Decode *d);)
+#ifdef CONFIG_FTRACE
+void ftrace_add(Decode *d);
+void ftrace_display();
+void ftrace_clear();
+#endif
+
+
 IFDEF(CONFIG_MTRACE, void mtrace_clear();)
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
@@ -54,6 +60,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
   IFDEF(CONFIG_WATCHPOINT, update_wp());
   IFDEF(CONFIG_IRINGBUF, iringbuf_add(_this->logbuf));
+  IFDEF(CONFIG_FTRACE, ftrace_add(_this));
 }
 
 static void exec_once(Decode *s, vaddr_t pc) {
@@ -129,6 +136,7 @@ void cpu_exec(uint64_t n) {
     case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
     case NEMU_ABORT:
       IFDEF(CONFIG_IRINGBUF, iringbuf_display());
+      IFDEF(CONFIG_FTRACE, ftrace_display());
     case NEMU_END:
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
@@ -137,12 +145,15 @@ void cpu_exec(uint64_t n) {
           nemu_state.halt_pc);
       if (nemu_state.halt_ret != 0) {
         IFDEF(CONFIG_IRINGBUF, iringbuf_display());
+        IFDEF(CONFIG_FTRACE, ftrace_display());
       }
     case NEMU_QUIT:
       statistic();
-      IFDEF(CONFIG_WATCHPOINT, clear_wp_pool());
       IFDEF(CONFIG_IRINGBUF, iringbuf_clear());
       IFDEF(CONFIG_MTRACE, mtrace_clear());
+      IFDEF(CONFIG_FTRACE, ftrace_clear());
+      IFDEF(CONFIG_DTRACE, dtrace_clear());
+      IFDEF(CONFIG_WATCHPOINT, clear_wp_pool());
   }
 }
 
