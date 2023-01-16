@@ -51,6 +51,7 @@ void ftrace_clear();
 
 
 IFDEF(CONFIG_MTRACE, void mtrace_clear();)
+IFDEF(CONFIG_DTRACE, void dtrace_clear();)
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND

@@ -32,12 +32,14 @@ uint8_t* new_space(int size) {
   return p;
 }
 
-IFDEF(CONFIG_MTRACE, void mtrace_display();)
-IFDEF(CONFIG_DTRACE, void dtrace_display();)
+#ifdef CONFIG_DTRACE
+enum {DREAD, DWRITE};
+void dtrace_add(IOMap *map, vaddr_t pc, int type);
+void dtrace_display();
+#endif
 
 static void check_bound(IOMap *map, paddr_t addr) {
   if (map == NULL) {
-    IFDEF(CONFIG_MTRACE, mtrace_display());
     IFDEF(CONFIG_DTRACE, dtrace_display());
     Assert(map != NULL, "address (" FMT_PADDR ") is out of bound at pc = " FMT_WORD, addr, cpu.pc);
   } else {
@@ -58,6 +60,7 @@ void init_map() {
 }
 
 word_t map_read(paddr_t addr, int len, IOMap *map) {
+  IFDEF(CONFIG_DTRACE, dtrace_add(map, cpu.pc, DREAD));
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);
   paddr_t offset = addr - map->low;
@@ -67,6 +70,7 @@ word_t map_read(paddr_t addr, int len, IOMap *map) {
 }
 
 void map_write(paddr_t addr, int len, word_t data, IOMap *map) {
+  IFDEF(CONFIG_DTRACE, dtrace_add(map, cpu.pc, DWRITE));
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);
   paddr_t offset = addr - map->low;

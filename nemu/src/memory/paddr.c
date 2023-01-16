@@ -28,7 +28,6 @@ static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 enum {PREAD, PWRITE};
 void mtrace_add(paddr_t paddr, vaddr_t pc, int type);
 void mtrace_display();
-void mtrace_clear();
 #endif
 
 uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
@@ -45,7 +44,6 @@ static void pmem_write(paddr_t addr, int len, word_t data) {
 
 static void out_of_bound(paddr_t addr) {
   IFDEF(CONFIG_MTRACE, mtrace_display());
-  IFDEF(CONFIG_MTRACE, mtrace_clear());
   panic("address = " FMT_PADDR " is out of bound of pmem [" FMT_PADDR ", " FMT_PADDR "] at pc = " FMT_WORD,
       addr, PMEM_LEFT, PMEM_RIGHT, cpu.pc);
 }
