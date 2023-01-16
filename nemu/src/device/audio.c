@@ -15,7 +15,6 @@
 
 #include <common.h>
 #include <device/map.h>
-#include <SDL2/SDL.h>
 
 enum {
   reg_freq,
@@ -24,13 +23,54 @@ enum {
   reg_sbuf_size,
   reg_init,
   reg_count,
+  reg_front,
+  reg_rear,
   nr_reg
 };
 
 static uint8_t *sbuf = NULL;
 static uint32_t *audio_base = NULL;
 
+#ifdef CONFIG_AUDIO_PLAY_SOUND
+#include <SDL2/SDL.h>
+
+static void play_sound(void *userdata, uint8_t *stream, int len) {
+  int i = 0;
+  while (i < len && audio_base[reg_count] > 0) {
+    stream[i] = sbuf[audio_base[reg_front]];
+    audio_base[reg_front] = (audio_base[reg_front] + 1) % audio_base[reg_sbuf_size];
+    audio_base[reg_count]--;
+    i++;
+  }
+  if (i < len) {
+    memset(stream + i, 0, len - i);
+  }
+}
+
+static void init_sound() {
+  SDL_AudioSpec s = {};
+  s.format = AUDIO_S16SYS;
+  s.userdata = NULL;
+  s.freq = audio_base[reg_freq];
+  s.channels = (uint8_t)(audio_base[reg_channels] & 0xff);
+  s.samples = (uint16_t)(audio_base[reg_samples] & 0xffff);
+  s.size = audio_base[reg_sbuf_size];
+  s.callback = play_sound;
+  SDL_InitSubSystem(SDL_INIT_AUDIO);
+  SDL_OpenAudio(&s, NULL);
+  SDL_PauseAudio(0);
+}
+
+#endif
+
 static void audio_io_handler(uint32_t offset, int len, bool is_write) {
+#ifdef CONFIG_AUDIO_PLAY_SOUND
+  if (is_write && audio_base[reg_init]) {
+    init_sound();
+    audio_base[reg_init] = 0;
+  }
+
+#endif
 }
 
 void init_audio() {
@@ -44,4 +84,9 @@ void init_audio() {
 
   sbuf = (uint8_t *)new_space(CONFIG_SB_SIZE);
   add_mmio_map("audio-sbuf", CONFIG_SB_ADDR, sbuf, CONFIG_SB_SIZE, NULL);
+
+  audio_base[reg_sbuf_size] = CONFIG_SB_SIZE;
+  audio_base[reg_front] = 0;
+  audio_base[reg_rear] = 0;
+  audio_base[reg_count] = 0;
 }

@@ -115,6 +115,10 @@ config AUDIO_CTL_PORT
 config AUDIO_CTL_MMIO
   hex "MMIO address of the audio controller"
   default 0xa0000200
+
+config AUDIO_PLAY_SOUND
+  bool "Enable SDL SOUND"
+  default y
 endif # HAS_AUDIO
 
 menuconfig HAS_DISK
