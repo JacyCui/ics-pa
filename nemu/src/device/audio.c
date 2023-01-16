@@ -69,7 +69,6 @@ static void audio_io_handler(uint32_t offset, int len, bool is_write) {
     init_sound();
     audio_base[reg_init] = 0;
   }
-
 #endif
 }
 

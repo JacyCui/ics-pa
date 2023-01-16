@@ -49,7 +49,6 @@ static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
 static int cmd_p(char *args);
-static int cmd_st(char *args);
 #ifdef CONFIG_WATCHPOINT
 static int cmd_w(char *args);
 static int cmd_d(char *args);
@@ -72,7 +71,6 @@ static struct {
   { "info", "Display information of registers(r) or watch points(w) or symbol tables(s)", cmd_info },
   { "x", "Print N words of memory started from Expr", cmd_x },
   { "p", "Evaluate the given expression Expr", cmd_p },
-  { "st", "Display symbol table", cmd_st},
 #ifdef CONFIG_WATCHPOINT
   { "w", "Set a watch point for Expr", cmd_w },
   { "d", "Delete the watch point numbered by N", cmd_d },
@@ -249,11 +247,6 @@ static int cmd_p(char *args) {
   printf("%sValid Expr: %s%s\n", ANSI_FG_GREEN, args, ANSI_NONE);
   printf("Value:  %-20s%-20s%-20s\n", "hexdecimal", "unsigned decimal", "signed decimal");
   printf("        %#-20x%-20u%-20d\n", res, res, res);
-  return 0;
-}
-
-static int cmd_st(char *args) {
-  isa_display_symtab();
   return 0;
 }
 
