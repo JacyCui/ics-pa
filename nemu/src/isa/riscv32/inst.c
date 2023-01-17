@@ -53,6 +53,10 @@ static void decode_operand(Decode *s, int *dest, word_t *src1, word_t *src2, wor
   }
 }
 
+/* handler functions for complex instructions */
+static void csrrw_handler(int dest, word_t src1, word_t csr, Decode *s);
+static void csrrs_handler(int dest, word_t src1, word_t csr, Decode *s);
+
 static int decode_exec(Decode *s) {
   int dest = 0;
   word_t src1 = 0, src2 = 0, imm = 0;
@@ -125,7 +129,14 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000001 ????? ????? 111 ????? 01100 11", remu   , RR, R(dest) = src1 % src2);
   
   ///// Special
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, csrrw_handler(dest, src1, imm & CSR_MASK, s));
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, csrrs_handler(dest, src1, imm & CSR_MASK, s));
   
+  
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(TRAP_MECALL, s->pc));
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , N, s->dnpc = cpu.mepc);
+
+
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
 
@@ -140,3 +151,28 @@ int isa_exec_once(Decode *s) {
   s->isa.inst.val = inst_fetch(&s->snpc, 4);
   return decode_exec(s);
 }
+
+/* handler functions for complex instructions */
+
+#define CSRRW(csr) gpr(dest) = cpu.csr; cpu.csr = src1
+
+static void csrrw_handler(int dest, word_t src1, word_t csr, Decode *s) {
+  switch (csr) {
+    case CSR_MTVEC_ADDR:      CSRRW(mtvec);       break;
+    case CSR_MSTATUS_ADDR:    CSRRW(mstatus);     break;
+    case CSR_MEPC_ADDR:       CSRRW(mepc);        break;
+    default: INV(s->pc);
+  }
+}
+
+#define CSRRS(csr) gpr(dest) = cpu.csr; cpu.csr = cpu.csr | src1
+
+static void csrrs_handler(int dest, word_t src1, word_t csr, Decode *s) {
+  switch (csr) {
+    case CSR_MCAUSE_ADDR:     CSRRS(mcause);      break;
+    case CSR_MSTATUS_ADDR:    CSRRS(mstatus);     break;
+    case CSR_MEPC_ADDR:       CSRRS(mepc);        break;
+    default: INV(s->pc); 
+  }
+}
+

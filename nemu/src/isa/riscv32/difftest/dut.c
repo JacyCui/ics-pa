@@ -18,7 +18,18 @@
 #include "../local-include/reg.h"
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
-  return memcmp(&cpu, ref_r, sizeof(CPU_state)) == 0;
+  if (ref_r->pc != cpu.pc) {
+    printf("%sref_r->pc = %#8x but cpu.pc = %#8x%s\n", ANSI_FG_RED, ref_r->pc, cpu.pc, ANSI_NONE);
+    return false;
+  }
+  int i;
+  for (i = 0; i < 32; i++) {
+    if (ref_r->gpr[i] != cpu.gpr[i]) {
+      printf("%sref_r->gpr[%d] = %#8x but cpu.gpr[%d] = %#8x%s\n", ANSI_FG_RED, i, ref_r->gpr[i], i, cpu.gpr[i], ANSI_NONE);
+      return false;
+    }
+  }
+  return true;
 }
 
 void isa_difftest_attach() {
