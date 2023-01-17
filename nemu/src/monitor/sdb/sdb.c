@@ -57,6 +57,7 @@ IFDEF(CONFIG_FTRACE, static int cmd_bt(char *args);)
 IFDEF(CONFIG_IRINGBUF, static int cmd_ir(char *args);)
 IFDEF(CONFIG_MTRACE, static int cmd_mt(char *args);)
 IFDEF(CONFIG_DTRACE, static int cmd_dt(char *args);)
+IFDEF(CONFIG_ETRACE, static int cmd_et(char *args);)
 
 static struct {
   const char *name;
@@ -79,6 +80,7 @@ static struct {
   IFDEF(CONFIG_IRINGBUF, { "ir", "Display instruction ring buffer", cmd_ir },)
   IFDEF(CONFIG_MTRACE, { "mt", "Display memory trace", cmd_mt },)
   IFDEF(CONFIG_DTRACE, { "dt", "Display device trace", cmd_dt },)
+  IFDEF(CONFIG_ETRACE, { "et", "Display exception trace", cmd_et },)
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -312,6 +314,15 @@ void dtrace_display();
 
 static int cmd_dt(char *args) {
   dtrace_display();
+  return 0;
+}
+#endif
+
+#ifdef CONFIG_ETRACE
+void etrace_display();
+
+static int cmd_et(char *args) {
+  etrace_display();
   return 0;
 }
 #endif

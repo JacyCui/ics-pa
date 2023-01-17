@@ -49,9 +49,13 @@ void ftrace_display();
 void ftrace_clear();
 #endif
 
-
 IFDEF(CONFIG_MTRACE, void mtrace_clear();)
 IFDEF(CONFIG_DTRACE, void dtrace_clear();)
+
+#ifdef CONFIG_ETRACE
+void etrace_display();
+void etrace_clear();
+#endif
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
@@ -146,6 +150,7 @@ void cpu_exec(uint64_t n) {
       if (nemu_state.halt_ret != 0) {
         IFDEF(CONFIG_IRINGBUF, iringbuf_display());
         IFDEF(CONFIG_FTRACE, ftrace_display());
+        IFDEF(CONFIG_ETRACE, etrace_display());
       }
     case NEMU_QUIT:
       statistic();
@@ -153,6 +158,7 @@ void cpu_exec(uint64_t n) {
       IFDEF(CONFIG_MTRACE, mtrace_clear());
       IFDEF(CONFIG_FTRACE, ftrace_clear());
       IFDEF(CONFIG_DTRACE, dtrace_clear());
+      IFDEF(CONFIG_ETRACE, etrace_clear());
       IFDEF(CONFIG_WATCHPOINT, clear_wp_pool());
   }
 }
