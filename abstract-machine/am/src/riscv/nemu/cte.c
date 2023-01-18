@@ -8,7 +8,12 @@ Context* __am_irq_handle(Context *c) {
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
-      case TRAP_MECALL: ev.event = EVENT_YIELD; break;
+      case TRAP_MECALL: 
+        if (c->GPR1 == -1) {
+          ev.event = EVENT_YIELD; break;
+        } else if (c->GPR1 >= 0 && c->GPR1 <= 19) {
+          ev.event = EVENT_SYSCALL; break;
+        }
       default: ev.event = EVENT_ERROR; break;
     }
 

@@ -38,7 +38,7 @@
 #elif defined(__ISA_LOONGARCH32R__)
 # define ARGS_ARRAY ("syscall 0", "a7", "a0", "a1", "a2", "a0")
 #else
-#error _syscall_ is not implemented
+//#error _syscall_ is not implemented
 #endif
 
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
@@ -62,11 +62,19 @@ int _open(const char *path, int flags, mode_t mode) {
 }
 
 int _write(int fd, void *buf, size_t count) {
-  _exit(SYS_write);
-  return 0;
+  return _syscall_(SYS_write, fd, (intptr_t)buf, count);
 }
 
+extern char _end;
+
 void *_sbrk(intptr_t increment) {
+  static char *brk = &_end;
+  char *old_brk = brk;
+  int ret = _syscall_(SYS_brk, increment, 0, 0);
+  if (ret == 0) {
+    brk += increment;
+    return old_brk;
+  }
   return (void *)-1;
 }
 
