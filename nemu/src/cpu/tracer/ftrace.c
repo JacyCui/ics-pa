@@ -3,19 +3,23 @@
 
 #ifdef CONFIG_FTRACE
 
-#define CALL_STACK_MAXLEN 128
+#define CALL_STACK_MAXLEN 256
 
 static struct ftrace {
   word_t pc;
   word_t value;
-  char symbol[128];
+  char symbol[256];
 } func_stack[CALL_STACK_MAXLEN];
 
 static int top = 0;
 
 void ftrace_add(Decode *d) {
+  if (top >= CALL_STACK_MAXLEN) {
+    printf("%s\n", ANSI_FMT("Ftrace overflow!", ANSI_FG_RED));
+    return;
+  }
   //ret
-  if (d->isa.inst.val == 0x00008067) {
+  if (d->isa.inst.val == 0x00008067 && top > 0) {
     top--;
     return;
   }

@@ -1,5 +1,6 @@
-#include <proc.h>
 #include <elf.h>
+#include <fs.h>
+#include <proc.h>
 
 #ifdef __LP64__
 # define Elf_Ehdr Elf64_Ehdr
@@ -24,21 +25,23 @@
 extern uint8_t ramdisk_start;
 size_t ramdisk_read(void *buf, size_t offset, size_t len);
 
-
 static uintptr_t loader(PCB *pcb, const char *filename) {
-  Elf_Ehdr *elf = (Elf_Ehdr *)(&ramdisk_start);
-  assert(memcmp(elf->e_ident, ELFMAG, 4) == 0 && elf->e_machine == EXPECT_TYPE);
-  Elf_Phdr *ph, *eph;
-  ph = (void *)elf + elf->e_phoff;
-  eph = ph + elf->e_phnum;
-  while (ph < eph) {
-    if (ph->p_type == PT_LOAD) {
-      ramdisk_read((void *)ph->p_vaddr, ph->p_offset, ph->p_filesz);
-      memset((void *)ph->p_vaddr + ph->p_filesz, 0, ph->p_memsz - ph->p_filesz);
+  int fd = fs_open(filename, 0, 0);
+  Elf_Ehdr elf;
+  fs_read(fd, &elf, sizeof(Elf_Ehdr));
+  assert(memcmp(elf.e_ident, ELFMAG, 4) == 0 && elf.e_machine == EXPECT_TYPE);
+  Elf_Phdr ph;
+  int i;
+  for (i = 0; i < elf.e_phnum; i++) {
+    fs_lseek(fd, elf.e_phoff + sizeof(Elf_Phdr) * i, SEEK_SET);
+    fs_read(fd, &ph, sizeof(Elf_Phdr));
+    if (ph.p_type == PT_LOAD) {
+      fs_lseek(fd, ph.p_offset, SEEK_SET);
+      fs_read(fd, (void *)ph.p_vaddr, ph.p_filesz);
+      memset((void *)ph.p_vaddr + ph.p_filesz, 0, ph.p_memsz - ph.p_filesz);
     }
-    ph++;
   }
-  return elf->e_entry;
+  return elf.e_entry;
 }
 
 void naive_uload(PCB *pcb, const char *filename) {

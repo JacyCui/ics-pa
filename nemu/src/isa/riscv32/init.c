@@ -42,10 +42,10 @@ void init_isa() {
   restart();
 }
 
-#define SYMBOL_MAX_NUM 128
+#define SYMBOL_MAX_NUM 256
 
 static struct symbol_entry {
-  char symbol[128];
+  char symbol[256];
   char type[8];
   word_t value;
 } symbol_table[SYMBOL_MAX_NUM] = {0};
