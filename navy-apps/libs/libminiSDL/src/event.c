@@ -17,7 +17,7 @@ int SDL_PushEvent(SDL_Event *ev) {
   return 0;
 }
 
-uint8_t keystate[KEY_NUM] = {0};
+static uint8_t keystate[KEY_NUM] = {0};
 
 int SDL_PollEvent(SDL_Event *ev) {
   static char buf[64] = {0};
@@ -48,20 +48,25 @@ int SDL_PollEvent(SDL_Event *ev) {
 int SDL_WaitEvent(SDL_Event *event) {
   static char buf[64] = {0};
   while (!NDL_PollEvent(buf, sizeof(buf))) ;
+  int i;
+  for (i = 0; i < KEY_NUM; i++) {
+    if (strcmp(buf + 3, keyname[i]) == 0) {
+      break;
+    }
+  }
+  if (i == KEY_NUM) {
+    return 0;
+  }
+  event->key.keysym.sym = i;
   if (buf[1] == 'd') {
     event->type = SDL_KEYDOWN;
+    keystate[i] = 1;
   }
   if (buf[1] == 'u') {
     event->type = SDL_KEYUP;
+    keystate[i] = 0;
   }
-  int i;
-  for (i = 0; i < sizeof(keyname); i++) {
-    if (strcmp(buf + 3, keyname[i]) == 0) {
-      event->key.keysym.sym = i;
-      return 1;
-    }
-  }
-  return 0;
+  return 1;
 }
 
 int SDL_PeepEvents(SDL_Event *ev, int numevents, int action, uint32_t mask) {
